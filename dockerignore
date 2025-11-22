@@ -1,0 +1,64 @@
+# ==========================================
+# .dockerignore - BACKEND
+# ==========================================
+# Fichiers à exclure du contexte Docker
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.iml
+.project
+.classpath
+.settings
+
+# Build
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+logs/
+*.log
+
+# Dépendances locales
+node_modules/
+.m2/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Docker
+docker-compose*.yml
+.dockerignore
+
+# Données
+data/
+backups/
+tickets/
+invoices/
+temp_images/
+
+# Environnement
+.env
+.env.*
+
+# Tests
+test/
+tests/
+**/*_test.java

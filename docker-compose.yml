@@ -1,0 +1,136 @@
+# ==========================================
+# DOCKER COMPOSE - SKYBOOKING ALGÉRIE 🇩🇿
+# VERSION SERVEUR - BACKEND UNIQUEMENT
+# ==========================================
+# Architecture: Serveur (Backend + MongoDB)
+# Les clients exécutent le frontend localement
+# ==========================================
+# Démarrage: docker-compose up -d
+# Arrêt: docker-compose down
+# Logs: docker-compose logs -f [service]
+# ==========================================
+
+version: '3.8'
+
+services:
+  # ========== MONGODB ==========
+  mongodb:
+    image: mongo:7.0
+    container_name: skybooking-mongodb
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    environment:
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE:-skybooking_db}
+    networks:
+      - skybooking-network
+    healthcheck:
+      test: |
+        mongosh --eval "db.adminCommand('ping')" --quiet || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    command: ["--quiet", "--bind_ip_all"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========== BACKEND CORBA + REST ==========
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE:-2025-01-21}
+        - VERSION=${VERSION:-2.0.0}
+    container_name: skybooking-backend
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:1050:1050"
+      - "0.0.0.0:8080:8080"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:${MONGODB_PORT:-27017}
+      - MONGODB_DB_NAME=${MONGO_INITDB_DATABASE:-skybooking_db}
+      - CORBA_NAMING_PORT=${CORBA_NAMING_PORT:-1050}
+      - REST_API_PORT=${REST_API_PORT:-8080}
+      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
+      - PASSWORD_PEPPER=${PASSWORD_PEPPER}
+      - JWT_SECRET=${JWT_SECRET}
+      - AES_SECRET_KEY=${AES_SECRET_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - TZ=Africa/Algiers
+    volumes:
+      - tickets_data:/app/tickets
+      - invoices_data:/app/invoices
+      - logs_data:/app/logs
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - skybooking-network
+    healthcheck:
+      test: |
+        curl -f http://localhost:${REST_API_PORT:-8080}/api/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  # ========== MONGO EXPRESS (Interface Admin) ==========
+  mongo-express:
+    image: mongo-express:latest
+    container_name: skybooking-mongo-express
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_URL=mongodb://mongodb:${MONGODB_PORT:-27017}
+      - ME_CONFIG_BASICAUTH_USERNAME=${ME_CONFIG_BASICAUTH_USERNAME:-admin}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${ME_CONFIG_BASICAUTH_PASSWORD:-admin123}
+      - ME_CONFIG_SITE_BASEURL=/
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - skybooking-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+# ========== VOLUMES ==========
+volumes:
+  mongodb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/mongodb
+  mongodb_config:
+    driver: local
+  tickets_data:
+    driver: local
+  invoices_data:
+    driver: local
+  logs_data:
+    driver: local
+
+# ========== NETWORKS ==========
+networks:
+  skybooking-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

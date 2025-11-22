@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <!-- ==================== INFORMATIONS DU PROJET ==================== -->
+    <groupId>com.skybooking</groupId>
+    <artifactId>flight-reservation-system</artifactId>
+    <version>2.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>SkyBooking Algérie - Système de Réservation de Vols</name>
+    <description>
+        Système professionnel de réservation de vols avec CORBA + MongoDB + REST API
+        Architecture modulaire et sécurisée pour l'Algérie 🇩🇿
+    </description>
+    
+    <!-- ==================== PROPRIÉTÉS ==================== -->
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        
+        <!-- Versions des dépendances -->
+        <mongodb.driver.version>4.11.1</mongodb.driver.version>
+        <gson.version>2.10.1</gson.version>
+        <bcrypt.version>0.4</bcrypt.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <itext.version>7.2.5</itext.version>
+        <zxing.version>3.5.2</zxing.version>
+        <junit.version>5.10.0</junit.version>
+    </properties>
+
+    <!-- ==================== DÉPENDANCES ==================== -->
+    <dependencies>
+        <!-- MongoDB Driver -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>${mongodb.driver.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>bson</artifactId>
+            <version>${mongodb.driver.version}</version>
+        </dependency>
+
+        <!-- Gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
+        </dependency>
+
+        <!-- BCrypt -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>${bcrypt.version}</version>
+        </dependency>
+
+        <!-- SLF4J -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- iText PDF -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext7-core</artifactId>
+            <version>${itext.version}</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>kernel</artifactId>
+            <version>${itext.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>layout</artifactId>
+            <version>${itext.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>io</artifactId>
+            <version>${itext.version}</version>
+        </dependency>
+
+        <!-- ZXing QR Codes -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>${zxing.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>${zxing.version}</version>
+        </dependency>
+
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- ==================== BUILD CONFIGURATION ==================== -->
+    <build>
+        <plugins>
+            <!-- ✅ Génération CORBA IDL -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-corba-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <exec executable="${java.home}/../bin/idlj" failonerror="true">
+                                    <arg value="-fall"/>
+                                    <arg value="-td"/>
+                                    <arg value="${project.build.sourceDirectory}"/>
+                                    <arg value="-i"/>
+                                    <arg value="src/main/idl"/>
+                                    <arg value="src/main/idl/FlightReservation.idl"/>
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ✅ Compilation Java -->
+            <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <version>3.11.0</version>
+    <configuration>
+        <source>8</source>
+        <target>8</target>
+        <encoding>UTF-8</encoding>
+        <compilerArgs>
+            <arg>-Xlint:none</arg> <!-- تعطيل كل التحذيرات أثناء التطوير -->
+        </compilerArgs>
+        <showWarnings>false</showWarnings>
+    </configuration>
+</plugin>
+
+            <!-- ✅ Tests JUnit 5 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <!-- ✅ Copie des dépendances (pour Docker) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ✅ Javadoc -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <source>8</source>
+                    <encoding>UTF-8</encoding>
+                    <show>private</show>
+                    <nohelp>true</nohelp>
+                </configuration>
+            </plugin>
+
+            <!-- ✅ Sources -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ✅ Nettoyage -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>tickets</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>invoices</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>temp_images</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- ==================== PROFILS ==================== -->
+    <profiles>
+        <!-- Profil développement -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <env>development</env>
+            </properties>
+        </profile>
+
+        <!-- Profil production -->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <env>production</env>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                    <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <!-- ==================== REPOSITORIES ==================== -->
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+    </repositories>
+
+    <!-- ==================== DÉVELOPPEURS ==================== -->
+    <developers>
+        <developer>
+            <id>skybooking-team</id>
+            <name>SkyBooking Development Team</name>
+            <email>dev@skybooking.dz</email>
+            <organization>SkyBooking Algérie</organization>
+            <timezone>Africa/Algiers</timezone>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Proprietary License</name>
+            <comments>Copyright (c) 2025 SkyBooking Algérie. Tous droits réservés.</comments>
+        </license>
+    </licenses>
+</project>

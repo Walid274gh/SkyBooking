@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * 🔍 Handler pour obtenir les détails d'un hôtel
+ * 🏨 Handler pour obtenir les détails d'un hôtel
  */
 public class HotelDetailHandler implements HttpHandler {
     
@@ -53,12 +53,12 @@ public class HotelDetailHandler implements HttpHandler {
                 return;
             }
             
-            System.out.println("🔍 Détails hôtel REST: " + hotelId);
+            System.out.println("🏨 Détails hôtel REST: " + hotelId);
             
-            // Récupérer avec timeout
+            // ✅ CORRECTION: Ajout du 3ème paramètre (nom opération)
             Hotel hotel = timeoutExecutor.executeWithTimeout(() -> {
                 return hotelManager.getHotelById(hotelId);
-            }, 10);
+            }, 10, "détails hôtel");
             
             // Convertir en JSON
             Map<String, Object> hotelMap = new LinkedHashMap<>();
@@ -87,10 +87,10 @@ public class HotelDetailHandler implements HttpHandler {
             System.out.println("✅ Détails hôtel retournés: " + hotel.hotelName);
             
         } catch (HotelNotFoundException e) {
-            System.err.println("✗ Hôtel non trouvé: " + e.message);
+            System.err.println("❌ Hôtel non trouvé: " + e.message);
             sendError(exchange, 404, e.message);
         } catch (Exception e) {
-            System.err.println("✗ Erreur serveur: " + e.getMessage());
+            System.err.println("❌ Erreur serveur: " + e.getMessage());
             e.printStackTrace();
             sendError(exchange, 500, "Erreur serveur: " + e.getMessage());
         }

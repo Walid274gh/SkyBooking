@@ -58,13 +58,13 @@ public class SearchHotelsHandler implements HttpHandler {
             System.out.println("🔍 Recherche hôtels REST: " + city + " | " + 
                              checkInDate + " → " + checkOutDate);
             
-            // Recherche avec timeout
+            // ✅ CORRECTION: Ajout du 3ème paramètre (nom opération)
             Hotel[] hotels = timeoutExecutor.executeWithTimeout(() -> {
                 return hotelManager.searchHotels(
                     city, checkInDate, checkOutDate, 
                     numberOfRooms, minStarRating
                 );
-            }, 15);
+            }, 15, "recherche hôtels");
             
             // Convertir en JSON avec indicateur de réduction si vol lié
             List<Map<String, Object>> hotelsWithDiscount = new ArrayList<>();
@@ -98,7 +98,7 @@ public class SearchHotelsHandler implements HttpHandler {
         } catch (NumberFormatException e) {
             sendError(exchange, 400, "Paramètres invalides");
         } catch (Exception e) {
-            System.err.println("✗ Erreur recherche hôtels: " + e.getMessage());
+            System.err.println("❌ Erreur recherche hôtels: " + e.getMessage());
             e.printStackTrace();
             sendError(exchange, 500, "Erreur lors de la recherche: " + e.getMessage());
         }

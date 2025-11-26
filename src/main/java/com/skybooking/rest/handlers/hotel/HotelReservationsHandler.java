@@ -55,10 +55,10 @@ public class HotelReservationsHandler implements HttpHandler {
             
             System.out.println("📋 Historique réservations hôtels REST: " + customerId);
             
-            // Récupérer avec timeout
+            // ✅ CORRECTION: Ajout du 3ème paramètre (nom opération)
             HotelReservation[] reservations = timeoutExecutor.executeWithTimeout(() -> {
                 return hotelManager.getCustomerHotelReservations(customerId);
-            }, 10);
+            }, 10, "historique hôtels");
             
             // Convertir en JSON
             List<Map<String, Object>> reservationsList = new ArrayList<>();
@@ -99,7 +99,7 @@ public class HotelReservationsHandler implements HttpHandler {
             System.out.println("✅ " + reservations.length + " réservation(s) hôtel retournée(s)");
             
         } catch (Exception e) {
-            System.err.println("✗ Erreur serveur: " + e.getMessage());
+            System.err.println("❌ Erreur serveur: " + e.getMessage());
             e.printStackTrace();
             sendError(exchange, 500, "Erreur serveur: " + e.getMessage());
         }

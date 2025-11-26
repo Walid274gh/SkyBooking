@@ -683,7 +683,7 @@ public class AdminManagerImpl extends AdminManagerPOA {
                 .append("createdAt", new Date())
                 .append("updatedAt", new Date());
             
-            hotelRepository.insert(hotel);
+            hotelRepository.insertHotel(hotel);
             
             System.out.println("✅ Hôtel créé: " + hotelId);
             return hotelId;

@@ -25,6 +25,20 @@ public class HotelRepository extends BaseRepository {
     }
     
     /**
+     * 🆕 CORRECTION: Méthode publique pour insérer un hôtel
+     * Remplace l'appel direct à insert() protégé
+     */
+    public void insertHotel(Document hotel) {
+        if (!hotel.containsKey("createdAt")) {
+            hotel.append("createdAt", new Date());
+        }
+        if (!hotel.containsKey("updatedAt")) {
+            hotel.append("updatedAt", new Date());
+        }
+        insert(hotel); // Appel protected autorisé depuis la sous-classe
+    }
+    
+    /**
      * Rechercher des hôtels avec filtres
      */
     public List<Document> searchHotels(String city, int numberOfRooms, int minStarRating) {
@@ -216,11 +230,13 @@ public class HotelRepository extends BaseRepository {
             .append("starRating", starRating)
             .append("description", generateDescription(hotelName, starRating))
             .append("pricePerNight", pricePerNight)
-            .append("availableRooms", 10 + random.nextInt(41)) // 10-50 chambres
+            .append("totalRooms", 10 + random.nextInt(41)) // 10-50 chambres
+            .append("availableRooms", 10 + random.nextInt(41))
             .append("imageUrl", generateImageUrl(starRating))
             .append("amenities", String.join(",", selectedAmenities))
             .append("reviewScore", 7.0 + random.nextDouble() * 3.0) // 7.0-10.0
             .append("reviewCount", 50 + random.nextInt(451)) // 50-500 avis
+            .append("status", "ACTIVE")
             .append("createdAt", new Date());
     }
     

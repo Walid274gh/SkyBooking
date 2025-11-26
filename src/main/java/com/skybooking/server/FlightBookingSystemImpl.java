@@ -19,7 +19,7 @@ public class FlightBookingSystemImpl extends FlightBookingSystemPOA {
     private AccountManager accountManager;
     private CancellationManager cancellationManager;
     private AdminManager adminManager;
-    private HotelManager hotelManager;  // ← NOUVEAU
+    private HotelManager hotelManager;
     
     public FlightBookingSystemImpl(ORB orb, POA poa) throws Exception {
         // Créer les implémentations
@@ -30,7 +30,9 @@ public class FlightBookingSystemImpl extends FlightBookingSystemPOA {
         AccountManagerImpl accountMgrImpl = new AccountManagerImpl();
         CancellationManagerImpl cancellationMgrImpl = new CancellationManagerImpl();
         AdminManagerImpl adminMgrImpl = new AdminManagerImpl();
-        HotelManagerImpl hotelMgrImpl = new HotelManagerImpl(reservationMgrImpl);  // ← NOUVEAU
+        
+        // ✅ CORRECTION: Passer l'implémentation concrète au lieu de l'interface
+        HotelManagerImpl hotelMgrImpl = new HotelManagerImpl(reservationMgrImpl);
         
         // Activer les objets dans le POA
         byte[] custId = poa.activate_object(customerMgrImpl);
@@ -40,7 +42,7 @@ public class FlightBookingSystemImpl extends FlightBookingSystemPOA {
         byte[] accountId = poa.activate_object(accountMgrImpl);
         byte[] cancellationId = poa.activate_object(cancellationMgrImpl);
         byte[] adminId = poa.activate_object(adminMgrImpl);
-        byte[] hotelId = poa.activate_object(hotelMgrImpl);  // ← NOUVEAU
+        byte[] hotelId = poa.activate_object(hotelMgrImpl);
         
         // Obtenir les références
         customerManager = CustomerManagerHelper.narrow(poa.id_to_reference(custId));
@@ -50,7 +52,7 @@ public class FlightBookingSystemImpl extends FlightBookingSystemPOA {
         accountManager = AccountManagerHelper.narrow(poa.id_to_reference(accountId));
         cancellationManager = CancellationManagerHelper.narrow(poa.id_to_reference(cancellationId));
         adminManager = AdminManagerHelper.narrow(poa.id_to_reference(adminId));
-        hotelManager = HotelManagerHelper.narrow(poa.id_to_reference(hotelId));  // ← NOUVEAU
+        hotelManager = HotelManagerHelper.narrow(poa.id_to_reference(hotelId));
         
         System.out.println("✅ Tous les managers initialisés (incluant HotelManager)");
     }
@@ -91,7 +93,7 @@ public class FlightBookingSystemImpl extends FlightBookingSystemPOA {
     }
     
     @Override
-    public HotelManager getHotelManager() {  // ← NOUVEAU
+    public HotelManager getHotelManager() {
         return hotelManager;
     }
 }

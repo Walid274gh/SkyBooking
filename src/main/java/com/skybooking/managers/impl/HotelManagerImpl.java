@@ -18,12 +18,15 @@ public class HotelManagerImpl extends HotelManagerPOA {
     
     private final HotelRepository hotelRepository;
     private final HotelReservationRepository hotelReservationRepository;
-    private final ReservationManager reservationManager;
+    
+    // ✅ CORRECTION: Changement du type Interface vers Implementation
+    private final ReservationManagerImpl reservationManager;
     
     // Configuration de la réduction Dynamic Packaging
     private static final double FLIGHT_DISCOUNT_PERCENTAGE = 15.0;
     
-    public HotelManagerImpl(ReservationManager reservationManager) {
+    // ✅ CORRECTION: Changement du paramètre Constructor
+    public HotelManagerImpl(ReservationManagerImpl reservationManager) {
         this.hotelRepository = new HotelRepository();
         this.hotelReservationRepository = new HotelReservationRepository();
         this.reservationManager = reservationManager;
@@ -52,12 +55,12 @@ public class HotelManagerImpl extends HotelManagerPOA {
         
         // Validation des dates
         if (!DateUtils.isFutureDate(checkInDate)) {
-            System.err.println("✗ Date check-in dans le passé");
+            System.err.println("❌ Date check-in dans le passé");
             return new Hotel[0];
         }
         
         if (!DateUtils.isAfter(checkOutDate, checkInDate)) {
-            System.err.println("✗ Date check-out invalide");
+            System.err.println("❌ Date check-out invalide");
             return new Hotel[0];
         }
         
@@ -164,8 +167,8 @@ public class HotelManagerImpl extends HotelManagerPOA {
                 .append("flightReservationId", flightReservationId)
                 .append("hasFlightDiscount", hasFlightDiscount);
             
-            // 8. Enregistrer la réservation
-            hotelReservationRepository.insert(reservation);
+            // 8. ✅ CORRECTION: Utilisation de insertReservation au lieu de insert
+            hotelReservationRepository.insertReservation(reservation);
             
             // 9. Décrémenter les chambres disponibles
             boolean updated = hotelRepository.decrementAvailableRooms(hotelId, numberOfRooms);
@@ -187,7 +190,7 @@ public class HotelManagerImpl extends HotelManagerPOA {
         } catch (HotelBookingException | NoRoomsAvailableException e) {
             throw e;
         } catch (Exception e) {
-            System.err.println("✗ Erreur réservation hôtel: " + e.getMessage());
+            System.err.println("❌ Erreur réservation hôtel: " + e.getMessage());
             e.printStackTrace();
             throw new HotelBookingException("Erreur lors de la réservation: " + e.getMessage());
         }
@@ -217,10 +220,6 @@ public class HotelManagerImpl extends HotelManagerPOA {
                 System.out.println("⚠️ Réservation de vol non confirmée");
                 return false;
             }
-            
-            // TODO: Optionnel - vérifier que la destination du vol correspond à la ville de l'hôtel
-            // Pour cela, il faudrait récupérer les détails du vol
-            // Pour l'instant, on accepte toute réservation de vol confirmée
             
             System.out.println("✓ Réservation de vol valide pour Dynamic Packaging");
             return true;

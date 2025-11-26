@@ -72,13 +72,13 @@ public class BookHotelHandler implements HttpHandler {
                 System.out.println("✨ Dynamic Packaging: Vol lié " + flightReservationId);
             }
             
-            // Réserver avec timeout
+            // ✅ CORRECTION: Ajout du 3ème paramètre (nom opération)
             HotelReservation reservation = timeoutExecutor.executeWithTimeout(() -> {
                 return hotelManager.bookHotel(
                     customerId, hotelId, checkInDate, checkOutDate,
                     numberOfRooms, flightReservationId
                 );
-            }, 15);
+            }, 20, "réservation hôtel");
             
             // Convertir en JSON
             Map<String, Object> response = hotelReservationToMap(reservation);
@@ -100,13 +100,13 @@ public class BookHotelHandler implements HttpHandler {
             }
             
         } catch (HotelBookingException e) {
-            System.err.println("✗ Erreur réservation: " + e.message);
+            System.err.println("❌ Erreur réservation: " + e.message);
             sendError(exchange, 400, e.message);
         } catch (NoRoomsAvailableException e) {
-            System.err.println("✗ Plus de chambres: " + e.message);
+            System.err.println("❌ Plus de chambres: " + e.message);
             sendError(exchange, 409, e.message);
         } catch (Exception e) {
-            System.err.println("✗ Erreur serveur: " + e.getMessage());
+            System.err.println("❌ Erreur serveur: " + e.getMessage());
             e.printStackTrace();
             sendError(exchange, 500, "Erreur lors de la réservation: " + e.getMessage());
         }
@@ -133,7 +133,6 @@ public class BookHotelHandler implements HttpHandler {
         map.put("flightReservationId", res.flightReservationId);
         map.put("hasFlightDiscount", res.hasFlightDiscount);
         
-        // Calculer l'économie
         if (res.hasFlightDiscount) {
             double savings = res.originalPrice - res.finalPrice;
             map.put("savings", savings);
